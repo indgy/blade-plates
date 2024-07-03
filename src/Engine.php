@@ -52,6 +52,10 @@ class Engine
     /** @var ResolveTemplatePath */
     private $resolveTemplatePath;
 
+    /** @var ResolveTemplatePath */
+    private $resolveCachePath;
+
+
     /**
      * Create new Engine instance.
      * @param string $directory
@@ -65,12 +69,25 @@ class Engine
         $this->functions = new Functions();
         $this->data = new Data();
         $this->resolveTemplatePath = new ResolveTemplatePath\NameAndFolderResolveTemplatePath();
+        $this->resolveCachePath = new ResolveTemplatePath\ResolveCachePath();
     }
 
     public static function fromTheme(Theme $theme, string $fileExtension = 'php'): self {
         $engine = new self(null, $fileExtension);
         $engine->setResolveTemplatePath(new ResolveTemplatePath\ThemeResolveTemplatePath($theme));
         return $engine;
+    }
+
+    public function setResolveCachePath(ResolveCachePath $resolveCachePath)
+    {
+        $this->resolveCachePath = $resolveCachePath;
+
+        return $this;
+    }
+
+    public function getResolveCachePath(): ResolveCachePath
+    {
+        return $this->resolveCachePath;
     }
 
     public function setResolveTemplatePath(ResolveTemplatePath $resolveTemplatePath)
