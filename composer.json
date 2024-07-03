@@ -1,6 +1,6 @@
 {
-    "name": "league/plates",
-    "description": "Plates, the native PHP template system that's fast, easy to use and easy to extend.",
+    "name": "indgy/blade-plates",
+    "description": "Plates, with Blade syntax support!",
     "keywords": [
         "league",
         "package",
