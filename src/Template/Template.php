@@ -337,6 +337,62 @@ class Template
     }
 
     /**
+     * Output a rendered template if the file exists.
+     * @param  string $name
+     * @param  array  $data
+     * @return null
+     */
+    public function insertIf(string $name, array $data = array())
+    {
+        if ($this->engine->exists($name)) {
+            echo $this->engine->render($name, $data);
+        }
+    }
+
+    /**
+     * Output the first rendered template that exists.
+     * @param  array $names
+     * @param  array  $data
+     * @return null
+     */
+    public function insertIf(array $names, array $data = array())
+    {
+        foreach ($names as $name) {
+            if ($this->engine->exists($name)) {
+                echo $this->engine->render($name, $data);
+            }
+        }
+    }
+
+    /**
+     * Output a rendered template if the logic is true.
+     * @param  bool   $logic
+     * @param  string $name
+     * @param  array  $data
+     * @return null
+     */
+    public function insertWhen(bool $logic, string $name, array $data = array())
+    {
+        if ($logic) {
+            echo $this->engine->render($name, $data);
+        }
+    }
+
+    /**
+     * Output a rendered template if the logic is false.
+     * @param  bool   $logic
+     * @param  string $name
+     * @param  array  $data
+     * @return null
+     */
+    public function insertUnless(bool $logic, string $name, array $data = array())
+    {
+        if ( ! $logic) {
+            echo $this->engine->render($name, $data);
+        }
+    }
+
+    /**
      * Apply multiple functions to variable.
      * @param  mixed  $var
      * @param  string $functions
@@ -399,5 +455,99 @@ class Template
     public function loop(int $count, ?Loop $parent = null): Loop
     {
         return new Loop($count, $parent);
+    }
+    /**
+     * Returns the true if field_name exists in the errors array
+     * @param   string    $field_name
+     * @return  bool
+     */
+    public function error(string $field_name): bool
+    {
+        return isset($this->data['errors'][$field_name]);
+    }
+    /**
+     * Accepts an array of classes where the array key contains the class or classes you wish to add,
+     * while the value is a boolean expression.
+     * Returns a space separated string.
+     * @param   array       $items
+     * @return  string
+     */
+    public function class(array $items = []): string
+    {
+        $items = array_filter($arr, function($v, $k) {
+            return $v === true;
+        }, ARRAY_FILTER_USE_BOTH);
+
+        return join(' ', $items);
+    }
+    /**
+     * Accepts an array of styles where the array key contains the style or styles you wish to add,
+     * while the value is a boolean expression.
+     * Returns a semi-colon deliminated string
+     * @param   array       $items
+     * @return  string
+     */
+    public function style(array $items = []): string
+    {
+        $items = array_filter($arr, function($v, $k) {
+            return $v === true;
+        }, ARRAY_FILTER_USE_BOTH);
+
+        return join('; ', $items);
+    }
+    /**
+     * Returns the html checked attribute if logic is true
+     * @param   mixed       $logic
+     * @return  string
+     */
+    public function checked(mixed $logic): string
+    {
+        return (true == $logic)
+            ? 'checked="checked"'
+            : '';
+    }
+    /**
+     * Returns the html disabled attribute if logic is true
+     * @param   mixed       $logic
+     * @return  string
+     */
+    public function disabled(mixed $logic): string
+    {
+        return (true == $logic)
+            ? 'disabled="disabled"'
+            : '';
+    }
+    /**
+     * Returns the html selected attribute if logic is true
+     * @param   mixed       $logic
+     * @return  string
+     */
+    public function selected(mixed $logic): string
+    {
+        return (true == $logic)
+            ? 'selected'
+            : '';
+    }
+    /**
+     * Returns the html readonly attribute if logic is true
+     * @param   mixed       $logic
+     * @return  string
+     */
+    public function readonly(mixed $logic): string
+    {
+        return (true == $logic)
+            ? 'readonly'
+            : '';
+    }
+    /**
+     * Returns the html required attribute if logic is true
+     * @param   mixed       $logic
+     * @return  string
+     */
+    public function required(mixed $logic): string
+    {
+        return (true == $logic)
+            ? 'required'
+            : '';
     }
 }
