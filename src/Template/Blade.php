@@ -26,7 +26,7 @@ class Blade
             // Stop the current section block.
             '/@end(section|preprend|push)/i' => '<?php $this->stop(); ?>',
             // Returns the content for a section block, or a default
-            '/@(yield|stack)\s?\((.*?)\)/i' => '<?= $this->section($1); ?>',
+            '/@(yield|stack)\s?\((.*?)\)/i' => '<?= $this->section($2); ?>',
             // Output a rendered template.
             '/@include\s?\((.*?)\)/i' => '<?php $this->insert($1); ?>',
             // Fetch a rendered template.
