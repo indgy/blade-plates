@@ -92,7 +92,7 @@ class Engine
         return $this;
     }
 
-    public function getResolveCachePath(): ResolveCachePath
+    public function getResolveCachePath(): ResolveTemplatePath
     {
         return $this->resolveCachePath;
     }
