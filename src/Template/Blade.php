@@ -68,7 +68,7 @@ class Blade
             '/{{\s*(.+?)\s+or\s+(.+?)\s*}}/i' => '<?php echo (isset($1)) ? $this->escape($1) : $2; ?>',
 
             // echo an escaped variable, ignoring @{{ var }} for js frameworks
-            '/(?<![@]){{\s*(.*?)\s*}}/i' => '<?php echo $this->escape($1 ?? ''); ?>',
+            '/(?<![@]){{\s*(.*?)\s*}}/i' => '<?php echo $this->escape($1 ?? ""); ?>',
             // output for js frameworks
             '/@{{\s*(.*?)\s*}}/i' => '{{ $1 }}',
 
