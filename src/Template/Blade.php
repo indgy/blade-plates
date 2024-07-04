@@ -13,14 +13,26 @@ class Blade
     {
         $map = [
 
-            // replace @extends with layout call
+            // Convert Blade to Plates
+
+            // Set the template's layout.
             '/@extends\s?\((.*?)\)/i' => '<?php $this->layout($1); ?>',
-            // include is a straight swap
-            '/@include\s?\((.*?)\)/i' => '<?php $this->include($1); ?>',
-            // section is a straight swap
-            '/@section\s?\((.*?)\)/i' => '<?php echo $this->section($1); ?>',
-            // section is the equivalent of yield
-            '/@yield\s?\((.*?)\)/i' => '<?php echo $this->section($1); ?>',
+            // Start a new section block.
+            '/@section\s?\((.*?)\)/i' => '<?php $this->start($1); ?>',
+            // Start a new section block in APPEND mode
+            '/@push\s?\((.*?)\)/i' => '<?php $this->push($1); ?>',
+            // Start a new section block in PREPEND mode.
+            '/@prepend\s?\((.*?)\)/i' => '<?php $this->unshift($1); ?>',
+            // Stop the current section block.
+            '/@end(section|preprend|push)/i' => '<?php $this->stop(); ?>',
+            // Returns the content for a section block, or a default
+            '/@(yield|stack)\s?\((.*?)\)/i' => '<?= $this->section($1); ?>',
+            // Output a rendered template.
+            '/@include\s?\((.*?)\)/i' => '<?php $this->insert($1); ?>',
+            // Fetch a rendered template.
+            // NOT SUPPORTED - use $var = $this->fetch(name, data)
+
+            // Convert Blade to PHP
 
             // unescape
             '/@@(break|continue|foreach|verbatim|endverbatim)/i' => '@$1',
