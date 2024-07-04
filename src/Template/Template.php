@@ -355,7 +355,7 @@ class Template
      * @param  array  $data
      * @return null
      */
-    public function insertIf(array $names, array $data = array())
+    public function insertFirst(array $names, array $data = array())
     {
         foreach ($names as $name) {
             if ($this->engine->exists($name)) {

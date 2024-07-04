@@ -41,7 +41,7 @@ class Blade
             // Output a rendered template if the file exists
             '/@includeIf\s?\((.*?)\)/i' => '<?php $this->insertIf($1); ?>',
             // Output the first rendered template that exists.
-            '/@includeFirst\s?\((.*?)\)/i' => '<?php $this->insertIf($1); ?>',
+            '/@includeFirst\s?\((.*?)\)/i' => '<?php $this->insertFirst($1); ?>',
             // Output a rendered template if the logic is true.
             '/@includeWhen\s?\((.*?)\)/i' => '<?php $this->insertWhen($1); ?>',
             // Output a rendered template if the logic is false.
