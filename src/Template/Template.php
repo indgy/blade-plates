@@ -386,4 +386,14 @@ class Template
     {
         return $this->escape($string, $functions);
     }
+    /**
+     * Return a new loop instance, optionally nesting the parent Loop instance.
+     * @param  int         $count
+     * @param  null|Loop   $parent
+     * @return Loop
+     */
+    public function loop(int $count, ?Loop $parent = null): Loop
+    {
+        return new Loop($count, $parent);
+    }
 }

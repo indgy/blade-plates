@@ -106,25 +106,25 @@ class Blade
             '/@endswitch/i' => '<?php endswitch; ?>',
 
             # handle loops and control structures
-            '/@foreach\s?\( *(.*?) *as *(.*?) *\)/i' => '<?php $loop = loop(count($1), $loop ?? null); foreach($1 as $2): ?>',
+            '/@foreach\s?\( *(.*?) *as *(.*?) *\)/i' => '<?php $loop = $this->loop(count($1), $loop ?? null); foreach($1 as $2): ?>',
             '/@endforeach\s*/i' => '<?php $loop->increment(); endforeach; $loop = $loop->parent(); ?>',
 
             # handle special forelse loop
-            '/@forelse\s?\(\s*(\S*)\s*as\s*(\S*)\s*\)(\s*)/i' => "<?php if(!empty($1)): \$loop = loop(count($1), \$loop ?? null); foreach($1 as $2): ?>\n",
+            '/@forelse\s?\(\s*(\S*)\s*as\s*(\S*)\s*\)(\s*)/i' => "<?php if(!empty($1)): \$loop = \$this->loop(count($1), \$loop ?? null); foreach($1 as $2): ?>\n",
             '/@empty(?![\s(])/' => "<?php \$loop->increment(); endforeach; \$loop = \$loop->parent(); ?>\n<?php else: ?>",
             '/@endforelse/' => '<?php endif; ?>',
 
             // this comes last so it does not match others above
-            '/@for\s?(\(.+\s*=\s*(\d+);\s*.+;\s*.+\s*\))/i' => '<?php $loop = loop(\\2, $loop ?? null); for\\1: ?>',
+            '/@for\s?(\(.+\s*=\s*(\d+);\s*.+;\s*.+\s*\))/i' => '<?php $loop = $this->loop(\\2, $loop ?? null); for\\1: ?>',
             '/@endfor/' => '<?php $loop->increment(); endfor; $loop = $loop->parent(); ?>',
 
             # each statements
             # eachelse matches first
-            '/@each\s?\((.*)\s*,\s*(.*)\s*,\s*[(\'|\")](.*)[(\'|\")],\s*(.*)\s*\)/i' => "<?php if (!empty($2)): \$loop = loop(count($2), \$loop ?? null); foreach($2 as \$$3): ?>\n@include($1)\n<?php \$loop->increment(); endforeach; \$loop = \$loop->parent(); ?>\n<?php else: ?>\n@include($4)\n<?php endif; ?>",
-            '/@each\s?\((.*)\s*,\s*(.*)\s*,\s*[(\'|\")](.*)[(\'|\")]\s*\)/i' => "<?php \$loop = loop(count($2), \$loop ?? null); foreach($2 as \$$3): ?>\n@include($1)\n<?php \$loop->increment(); endforeach; \$loop = \$loop->parent(); ?>",
+            '/@each\s?\((.*)\s*,\s*(.*)\s*,\s*[(\'|\")](.*)[(\'|\")],\s*(.*)\s*\)/i' => "<?php if (!empty($2)): \$loop = \$this->loop(count($2), \$loop ?? null); foreach($2 as \$$3): ?>\n@include($1)\n<?php \$loop->increment(); endforeach; \$loop = \$loop->parent(); ?>\n<?php else: ?>\n@include($4)\n<?php endif; ?>",
+            '/@each\s?\((.*)\s*,\s*(.*)\s*,\s*[(\'|\")](.*)[(\'|\")]\s*\)/i' => "<?php \$loop = \$this->loop(count($2), \$loop ?? null); foreach($2 as \$$3): ?>\n@include($1)\n<?php \$loop->increment(); endforeach; \$loop = \$loop->parent(); ?>",
 
             // while
-            '/@while\s?\((.*)\)/i' => '<?php $loop = loop(count($1), $loop ?? null); while ($1): ?>',
+            '/@while\s?\((.*)\)/i' => '<?php $loop = $this->loop(count($1), $loop ?? null); while ($1): ?>',
             '/@endwhile/' => '<?php $loop->increment(); endwhile; $loop = $loop->parent(); ?>',
 
             # control structures
