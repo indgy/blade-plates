@@ -32,6 +32,12 @@ class Engine
     protected $fileExtension;
 
     /**
+     * Flag to set cache use
+     * @var bool
+     */
+    protected $useCache;
+
+    /**
      * Collection of template folders.
      * @var Folders
      */
@@ -61,10 +67,11 @@ class Engine
      * @param string $directory
      * @param string $fileExtension
      */
-    public function __construct($directory = null, $fileExtension = 'php')
+    public function __construct($directory = null, $fileExtension = 'php', bool $useCache = false)
     {
         $this->directory = new Directory($directory);
         $this->fileExtension = new FileExtension($fileExtension);
+        $this->useCache = $useCache;
         $this->folders = new Folders();
         $this->functions = new Functions();
         $this->data = new Data();
@@ -142,6 +149,15 @@ class Engine
     public function getFileExtension()
     {
         return $this->fileExtension->get();
+    }
+
+    /**
+     * Get the value of the useCache flag.
+     * @return bool
+     */
+    public function useCache()
+    {
+        return $this->useCache;
     }
 
     /**

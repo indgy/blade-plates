@@ -159,9 +159,13 @@ class Template
     {
         $this->data($data);
 
+        // get cached template path
         $path = ($this->engine->getResolveCachePath())($this->name);
-        if ( ! file_exists($path)) {    // or cached file is much older than template file
+        // we always need a cached template
+        if ( ! file_exists($path) or $this->engine->useCache() === false) {
+            // fetch content from template
             $content = file_get_contents(($this->engine->getResolveTemplatePath())($this->name));
+            // store compiled content in cache path
             file_put_contents($path, (new Blade)->convert($content));
         }
 
