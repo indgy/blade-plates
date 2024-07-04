@@ -9,7 +9,7 @@ class Blade
      * @param  string      $string
      * @return string
      */
-    protected function convert(string $string): string
+    public function convert(string $string): string
     {
         $map = [
 
