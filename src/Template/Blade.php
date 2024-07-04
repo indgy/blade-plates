@@ -41,17 +41,17 @@ class Blade
             '/{{--[\s\S]*?--}}/i' => '',
 
             # echo with a default
-            '/{{\s*(.+?)\s+or\s+(.+?)\s*}}/i' => '<?php echo (isset($1)) ? $this->e($1) : $2; ?>',
+            '/{{\s*(.+?)\s+or\s+(.+?)\s*}}/i' => '<?php echo (isset($1)) ? $this->escape($1) : $2; ?>',
 
             # echo an escaped variable, ignoring @{{ var }} for js frameworks
-            '/(?<![@]){{\s*(.*?)\s*}}/i' => '<?php echo $this->e($1); ?>',
+            '/(?<![@]){{\s*(.*?)\s*}}/i' => '<?php echo $this->escape($1); ?>',
             # output for js frameworks
             '/@{{\s*(.*?)\s*}}/i' => '{{ $1 }}',
 
             # echo an unescaped variable
             '/{!!\s*(.+?)\s*!!}/i' => '<?php echo $1; ?>',
 
-            # variable display mutators, wrap these in $this->e() escape function as necessary
+            # variable display mutators, wrap these in $this->escape() escape function as necessary
             '/@csrf(?![\s(])/i' => '<input type="hidden" name="_csrf_token" value="$csrf">',
             '/@csrf\(([^()]+),\s*["\']([^"\']+)["\']\)/i' => '<input type="hidden" name="$2" value="$1">',
             '/@csrf\s?\((.*?)\)/i' => '<input type="hidden" name="_csrf_token" value="$1">',
@@ -63,16 +63,16 @@ class Blade
             '/@js\((.*?)\s?\)/i' => '<?php echo js($1); ?>',
             '/@method\s?\((.*?)\)/i' => '<input type="hidden" name="_METHOD" value="$1">',
             '/@method\s?\((.*?)\s?,\s?(.*?)\s?\)/i' => '<input type="hidden" name="$2" value="$1">',
-            '/@lower\s?\((.*?)\)/i' => '<?php echo $this->e(strtolower($1)); ?>',
-            '/@upper\s?\((.*?)\)/i' => '<?php echo $this->e(strtoupper($1)); ?>',
-            '/@ucfirst\s?\((.*?)\)/i' => '<?php echo $this->e(ucfirst(strtolower($1))); ?>',
-            '/@ucwords\s?\((.*?)\)/i' => '<?php echo $this->e(ucwords(strtolower($1))); ?>',
-            '/@(format|sprintf)\s?\((.*?)\)/i' => '<?php echo $this->e(sprintf($2)); ?>',
+            '/@lower\s?\((.*?)\)/i' => '<?php echo $this->escape(strtolower($1)); ?>',
+            '/@upper\s?\((.*?)\)/i' => '<?php echo $this->escape(strtoupper($1)); ?>',
+            '/@ucfirst\s?\((.*?)\)/i' => '<?php echo $this->escape(ucfirst(strtolower($1))); ?>',
+            '/@ucwords\s?\((.*?)\)/i' => '<?php echo $this->escape(ucwords(strtolower($1))); ?>',
+            '/@(format|sprintf)\s?\((.*?)\)/i' => '<?php echo $this->escape(sprintf($2)); ?>',
 
             # wordwrap has multiple parameters
-            '/@wrap\s?\((.*?)\)/i' => '<?php echo $this->e(wordwrap($1)); ?>',
-            '/@wrap\s?\((.*?)\s*,\s*(.*?)\)/i' => '<?php echo $this->e(wordwrap($1, $2)); ?>',
-            '/@wrap\s?\((.*?)\s*,\s*(.*?)\s*,\s*(.*?)\)/i' => '<?php echo $this->e(wordwrap($1, $2, $3)); ?>',
+            '/@wrap\s?\((.*?)\)/i' => '<?php echo $this->escape(wordwrap($1)); ?>',
+            '/@wrap\s?\((.*?)\s*,\s*(.*?)\)/i' => '<?php echo $this->escape(wordwrap($1, $2)); ?>',
+            '/@wrap\s?\((.*?)\s*,\s*(.*?)\s*,\s*(.*?)\)/i' => '<?php echo $this->escape(wordwrap($1, $2, $3)); ?>',
 
             # set and unset statements
             '/@set\(([\'"])(\w+)\1,\s*([\'"])(.*?)\3\)/i' => '<?php $\2 = "\4"; ?>',
