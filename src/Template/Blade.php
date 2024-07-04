@@ -76,22 +76,29 @@ class Blade
             '/{!!\s*(.+?)\s*!!}/i' => '<?php echo $1; ?>',
 
             // variable display mutators, wrap these in $this->escape() escape function as necessary
-            '/@csrf(?![\s(])/i' => '<input type="hidden" name="_csrf_token" value="$csrf">',
-            '/@csrf\(([^()]+),\s*["\']([^"\']+)["\']\)/i' => '<input type="hidden" name="$2" value="$1">',
-            '/@csrf\s?\((.*?)\)/i' => '<input type="hidden" name="_csrf_token" value="$1">',
+            '/@csrf\s*(?!\()/' => '<input type="hidden" name="<?php echo $__csrf_token_name ?>" value="<?php echo $__csrf_token ?>">',
+            '/@csrf\(\)/' => '<input type="hidden" name="<?php echo $__csrf_token_name ?>" value="<?php echo $__csrf_token ?>">',
+            '/@csrf\(\s*(\$[a-zA-Z0-9_]+)\s*\)/' => '<input type="hidden" name="<?php echo $__csrf_token_name ?>" value="<?php echo $1 ?>">',
+            '/@csrf\(\s*(\$[a-zA-Z0-9_]+)\s*,\s*(\$[a-zA-Z0-9_]+)\s*\)/' => '<input type="hidden" name="<?php echo $2 ?>" value="<?php echo $1 ?>">',
+
             '/@json\((.*?)\s?,\s?(.*?)\s?,\s?(.*?)\s?\)/i' => '<?php echo json_encode($1, $2, $3); ?>',
             '/@json\((.*?)\s?,\s?(.*?)\s?\)/i' => '<?php echo json_encode($1, $2, 512); ?>',
             '/@json\((.*?)\s?\)/i' => '<?php echo json_encode($1, 15, 512); ?>',
+
             '/@js\((.*?)\s?,\s?(.*?)\s?,\s?(.*?)\s?\)/i' => '<?php echo js($1, $2, $3); ?>',
             '/@js\((.*?)\s?,\s?(.*?)\s?\)/i' => '<?php echo js($1, $2); ?>',
             '/@js\((.*?)\s?\)/i' => '<?php echo js($1); ?>',
+
             '/@method\s?\((.*?)\)/i' => '<input type="hidden" name="_METHOD" value="$1">',
             '/@method\s?\((.*?)\s?,\s?(.*?)\s?\)/i' => '<input type="hidden" name="$2" value="$1">',
+
             '/@lower\s?\((.*?)\)/i' => '<?php echo $this->escape(strtolower($1)); ?>',
             '/@upper\s?\((.*?)\)/i' => '<?php echo $this->escape(strtoupper($1)); ?>',
             '/@ucfirst\s?\((.*?)\)/i' => '<?php echo $this->escape(ucfirst(strtolower($1))); ?>',
             '/@ucwords\s?\((.*?)\)/i' => '<?php echo $this->escape(ucwords(strtolower($1))); ?>',
+
             '/@(format|sprintf)\s?\((.*?)\)/i' => '<?php echo $this->escape(sprintf($2)); ?>',
+
 
             // wordwrap has multiple parameters
             '/@wrap\s?\((.*?)\)/i' => '<?php echo $this->escape(wordwrap($1)); ?>',
