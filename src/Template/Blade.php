@@ -19,6 +19,7 @@ class Blade
             '/@error\s?\((.*?)\)(.*?)\s?@else\s?(.*?)\s?@enderror/is' => '<?php if ($this->error($1)):?>$2<?php else: ?>$3<?php endif; ?>',
             '/@error\s?\((.*?)\)(.*?)\s?@enderror/is' => '<?php if ($this->error($1)):?>$2<?php endif; ?>',
 
+            '/^@dump\((.*)\)$/ms' => '<?php echo var_dump($1, true) ?>',
 
             // Convert Blade to Plates
 
@@ -98,7 +99,6 @@ class Blade
             '/@ucwords\s?\((.*?)\)/i' => '<?php echo $this->escape(ucwords(strtolower($1))); ?>',
 
             '/@(format|sprintf)\s?\((.*?)\)/i' => '<?php echo $this->escape(sprintf($2)); ?>',
-
 
             // wordwrap has multiple parameters
             '/@wrap\s?\((.*?)\)/i' => '<?php echo $this->escape(wordwrap($1)); ?>',
