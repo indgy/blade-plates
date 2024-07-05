@@ -162,7 +162,7 @@ class Template
         // get cached template path
         $path = ($this->engine->getResolveCachePath())($this->name);
         // we always need a cached template
-        if ( ! file_exists($path) or $this->engine->useCache() === false) {
+        if (!file_exists($path) or $this->engine->useCache() === false) {
             // fetch content from template
             $content = file_get_contents(($this->engine->getResolveTemplatePath())($this->name));
             // store compiled content in cache path
@@ -173,7 +173,7 @@ class Template
             $level = ob_get_level();
             ob_start();
 
-            (function() {
+            (function () {
                 extract($this->data);
                 include func_get_arg(0);
             })($path);
@@ -281,7 +281,7 @@ class Template
                 break;
 
             case self::SECTION_MODE_PREPEND:
-                $this->sections[$this->sectionName] = ob_get_clean().$this->sections[$this->sectionName];
+                $this->sections[$this->sectionName] = ob_get_clean() . $this->sections[$this->sectionName];
                 break;
 
         }
@@ -387,7 +387,7 @@ class Template
      */
     public function insertUnless(bool $logic, string $name, array $data = array())
     {
-        if ( ! $logic) {
+        if (!$logic) {
             echo $this->engine->render($name, $data);
         }
     }
@@ -433,7 +433,7 @@ class Template
             $string = $this->batch($string, $functions);
         }
 
-        return htmlspecialchars($string ?? '', $flags, 'UTF-8');
+        return htmlspecialchars((string) $string ?? '', $flags, 'UTF-8');
     }
 
     /**
@@ -461,9 +461,17 @@ class Template
      * @param   string    $field_name
      * @return  bool
      */
-    public function error(string $field_name): bool
+    public function error(string $field_name, string $bag = 'errors'): bool
     {
-        return isset($this->data['errors'][$field_name]);
+        if (!isset($this->data[$bag])) {
+            return false;
+        }
+        if (is_array($this->data[$bag])) {
+            return isset($this->data[$bag][$field_name]);
+        }
+        if (is_object($this->data[$bag]) && method_exists($this->data[$bag], 'has')) {
+            return $this->data[$bag]->has($field_name);
+        }
     }
     /**
      * Accepts an array of classes where the array key contains the class or classes you wish to add,
@@ -474,7 +482,7 @@ class Template
      */
     public function class(array $items = []): string
     {
-        $items = array_filter($arr, function($v, $k) {
+        $items = array_filter($arr, function ($v, $k) {
             return $v === true;
         }, ARRAY_FILTER_USE_BOTH);
 
@@ -489,7 +497,7 @@ class Template
      */
     public function style(array $items = []): string
     {
-        $items = array_filter($arr, function($v, $k) {
+        $items = array_filter($arr, function ($v, $k) {
             return $v === true;
         }, ARRAY_FILTER_USE_BOTH);
 
