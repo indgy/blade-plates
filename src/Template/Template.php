@@ -158,25 +158,26 @@ class Template
     public function render(array $data = array())
     {
         $this->data($data);
-        $path = ($this->engine->getResolveTemplatePath())($this->name);
+
+        // get cached template path
+        $path = ($this->engine->getResolveCachePath())($this->name);
+        // we always need a cached template
+        if (!file_exists($path) or $this->engine->useCache() === false) {
+            // fetch content from template
+            $content = file_get_contents(($this->engine->getResolveTemplatePath())($this->name));
+            // store compiled content in cache path
+            file_put_contents($path, (new Blade)->convert($content));
+        }
 
         try {
             $level = ob_get_level();
             ob_start();
 
-            // (function() {
-            //     extract($this->data);
-            //     include func_get_arg(0);
-            // })($path);
-
-            // @TODO use cache/templates to save de-Bladed files to cache and include from there
             (function () {
                 extract($this->data);
-                $content = file_get_contents(func_get_arg(0));
-                $content = $this->deBlade($content);
-                eval ('?>' . $content);
+                include func_get_arg(0);
             })($path);
-            
+
             $content = ob_get_clean();
 
             if (isset($this->layoutName)) {
@@ -280,7 +281,7 @@ class Template
                 break;
 
             case self::SECTION_MODE_PREPEND:
-                $this->sections[$this->sectionName] = ob_get_clean().$this->sections[$this->sectionName];
+                $this->sections[$this->sectionName] = ob_get_clean() . $this->sections[$this->sectionName];
                 break;
 
         }
@@ -336,6 +337,62 @@ class Template
     }
 
     /**
+     * Output a rendered template if the file exists.
+     * @param  string $name
+     * @param  array  $data
+     * @return null
+     */
+    public function insertIf(string $name, array $data = array())
+    {
+        if ($this->engine->exists($name)) {
+            echo $this->engine->render($name, $data);
+        }
+    }
+
+    /**
+     * Output the first rendered template that exists.
+     * @param  array $names
+     * @param  array  $data
+     * @return null
+     */
+    public function insertFirst(array $names, array $data = array())
+    {
+        foreach ($names as $name) {
+            if ($this->engine->exists($name)) {
+                echo $this->engine->render($name, $data);
+            }
+        }
+    }
+
+    /**
+     * Output a rendered template if the logic is true.
+     * @param  bool   $logic
+     * @param  string $name
+     * @param  array  $data
+     * @return null
+     */
+    public function insertWhen(bool $logic, string $name, array $data = array())
+    {
+        if ($logic) {
+            echo $this->engine->render($name, $data);
+        }
+    }
+
+    /**
+     * Output a rendered template if the logic is false.
+     * @param  bool   $logic
+     * @param  string $name
+     * @param  array  $data
+     * @return null
+     */
+    public function insertUnless(bool $logic, string $name, array $data = array())
+    {
+        if (!$logic) {
+            echo $this->engine->render($name, $data);
+        }
+    }
+
+    /**
      * Apply multiple functions to variable.
      * @param  mixed  $var
      * @param  string $functions
@@ -376,7 +433,7 @@ class Template
             $string = $this->batch($string, $functions);
         }
 
-        return htmlspecialchars($string ?? '', $flags, 'UTF-8');
+        return htmlspecialchars((string) $string ?? '', $flags, 'UTF-8');
     }
 
     /**
@@ -389,130 +446,116 @@ class Template
     {
         return $this->escape($string, $functions);
     }
-
     /**
-     * Converts Blade syntax to Plates syntax.
-     * @param  string      $string
-     * @return string
+     * Return a new loop instance, optionally nesting the parent Loop instance.
+     * @param  int         $count
+     * @param  null|Loop   $parent
+     * @return Loop
      */
-    protected function deBlade(string $string): string
+    public function loop(int $count, ?Loop $parent = null): Loop
     {
-        $map = [
+        return new Loop($count, $parent);
+    }
+    /**
+     * Returns the true if field_name exists in the errors array
+     * @param   string    $field_name
+     * @return  bool
+     */
+    public function error(string $field_name, string $bag = 'errors'): bool
+    {
+        if (!isset($this->data[$bag])) {
+            return false;
+        }
+        if (is_array($this->data[$bag])) {
+            return isset($this->data[$bag][$field_name]);
+        }
+        if (is_object($this->data[$bag]) && method_exists($this->data[$bag], 'has')) {
+            return $this->data[$bag]->has($field_name);
+        }
+    }
+    /**
+     * Accepts an array of classes where the array key contains the class or classes you wish to add,
+     * while the value is a boolean expression.
+     * Returns a space separated string.
+     * @param   array       $items
+     * @return  string
+     */
+    public function class(array $items = []): string
+    {
+        $items = array_filter($arr, function ($v, $k) {
+            return $v === true;
+        }, ARRAY_FILTER_USE_BOTH);
 
-            // replace @extends with layout call
-            '/@extends\s?\((.*?)\)/i' => '<?php $this->layout($1); ?>',
-            // include is a straight swap
-            '/@include\s?\((.*?)\)/i' => '<?php $this->include($1); ?>',
-            // section is a straight swap
-            '/@section\s?\((.*?)\)/i' => '<?php echo $this->section($1); ?>',
-            // section is the equivalent of yield
-            '/@yield\s?\((.*?)\)/i' => '<?php echo $this->section($1); ?>',
+        return join(' ', $items);
+    }
+    /**
+     * Accepts an array of styles where the array key contains the style or styles you wish to add,
+     * while the value is a boolean expression.
+     * Returns a semi-colon deliminated string
+     * @param   array       $items
+     * @return  string
+     */
+    public function style(array $items = []): string
+    {
+        $items = array_filter($arr, function ($v, $k) {
+            return $v === true;
+        }, ARRAY_FILTER_USE_BOTH);
 
-            // unescape
-            '/@@(break|continue|foreach|verbatim|endverbatim)/i' => '@$1',
-
-            # remove blade comments
-            '/{{--[\s\S]*?--}}/i' => '',
-
-            # echo with a default
-            '/{{\s*(.+?)\s+or\s+(.+?)\s*}}/i' => '<?php echo (isset($1)) ? $this->e($1) : $2; ?>',
-
-            # echo an escaped variable, ignoring @{{ var }} for js frameworks
-            '/(?<![@]){{\s*(.*?)\s*}}/i' => '<?php echo $this->e($1); ?>',
-            # output for js frameworks
-            '/@{{\s*(.*?)\s*}}/i' => '{{ $1 }}',
-
-            # echo an unescaped variable
-            '/{!!\s*(.+?)\s*!!}/i' => '<?php echo $1; ?>',
-
-            # variable display mutators, wrap these in $this->e() escape function as necessary
-            '/@csrf(?![\s(])/i' => '<input type="hidden" name="_csrf_token" value="$csrf">',
-            '/@csrf\(([^()]+),\s*["\']([^"\']+)["\']\)/i' => '<input type="hidden" name="$2" value="$1">',
-            '/@csrf\s?\((.*?)\)/i' => '<input type="hidden" name="_csrf_token" value="$1">',
-            '/@json\((.*?)\s?,\s?(.*?)\s?,\s?(.*?)\s?\)/i' => '<?php echo json_encode($1, $2, $3); ?>',
-            '/@json\((.*?)\s?,\s?(.*?)\s?\)/i' => '<?php echo json_encode($1, $2, 512); ?>',
-            '/@json\((.*?)\s?\)/i' => '<?php echo json_encode($1, 15, 512); ?>',
-            '/@js\((.*?)\s?,\s?(.*?)\s?,\s?(.*?)\s?\)/i' => '<?php echo js($1, $2, $3); ?>',
-            '/@js\((.*?)\s?,\s?(.*?)\s?\)/i' => '<?php echo js($1, $2); ?>',
-            '/@js\((.*?)\s?\)/i' => '<?php echo js($1); ?>',
-            '/@method\s?\((.*?)\)/i' => '<input type="hidden" name="_METHOD" value="$1">',
-            '/@method\s?\((.*?)\s?,\s?(.*?)\s?\)/i' => '<input type="hidden" name="$2" value="$1">',
-            '/@lower\s?\((.*?)\)/i' => '<?php echo $this->e(strtolower($1)); ?>',
-            '/@upper\s?\((.*?)\)/i' => '<?php echo $this->e(strtoupper($1)); ?>',
-            '/@ucfirst\s?\((.*?)\)/i' => '<?php echo $this->e(ucfirst(strtolower($1))); ?>',
-            '/@ucwords\s?\((.*?)\)/i' => '<?php echo $this->e(ucwords(strtolower($1))); ?>',
-            '/@(format|sprintf)\s?\((.*?)\)/i' => '<?php echo $this->e(sprintf($2)); ?>',
-
-            # wordwrap has multiple parameters
-            '/@wrap\s?\((.*?)\)/i' => '<?php echo $this->e(wordwrap($1)); ?>',
-            '/@wrap\s?\((.*?)\s*,\s*(.*?)\)/i' => '<?php echo $this->e(wordwrap($1, $2)); ?>',
-            '/@wrap\s?\((.*?)\s*,\s*(.*?)\s*,\s*(.*?)\)/i' => '<?php echo $this->e(wordwrap($1, $2, $3)); ?>',
-
-            # set and unset statements
-            '/@set\(([\'"])(\w+)\1,\s*([\'"])(.*?)\3\)/i' => '<?php $\2 = "\4"; ?>',
-            '/@unset\s?\(\$(\w+)\)/i' => '<?php unset($\1); ?>',
-
-            # isset statement
-            '/@isset\s?\((.*?)\)/i' => '<?php if (isset($1)): ?>',
-            '/@endisset/i' => '<?php endif; ?>',
-
-            # has statement
-            '/@has\s?\((.*?)\)/i' => '<?php if (isset($1) && ! empty($1)): ?>',
-            '/@endhas/i' => '<?php endif; ?>',
-
-            # handle special unless statement
-            '/@unless\s?\((.*?)\)(\s+?)/i' => '<?php if (!($1)): ?>$2',
-            '/@endunless/i' => '<?php endif; ?>',
-
-            # special empty statement
-            '/@empty\s?\((.*?)\)/i' => '<?php if (empty($1)): ?>',
-            '/@endempty/i' => '<?php endif; ?>',
-
-            # switch statement
-            '/@switch\s*\((.*?)\)\s*@case\s*\((.*?)\)/s' => "<?php switch($1):\ncase ($2): ?>",
-            '/@case\((.*?)\)/i' => '<?php case ($1): ?>',
-            '/@default/i' => '<?php default: ?>',
-            '/@continue\(\s*(.*)\s*\)/i' => '<?php if($1): continue; endif; ?>',
-            '/@continue/i' => '<?php continue; ?>',
-            '/@break\(\s*([0-9])\s*\)/i' => '<?php break $1; ?>',
-            '/@break\(\s*(.*)\s*\)/i' => '<?php if($1) break; ?>',
-            '/@break/i' => '<?php break; ?>',
-            '/@endswitch/i' => '<?php endswitch; ?>',
-
-            # handle loops and control structures
-            '/@foreach\s?\( *(.*?) *as *(.*?) *\)/i' => '<?php $loop = loop(count($1), $loop ?? null); foreach($1 as $2): ?>',
-            '/@endforeach\s*/i' => '<?php $loop->increment(); endforeach; $loop = $loop->parent(); ?>',
-
-            # handle special forelse loop
-            '/@forelse\s?\(\s*(\S*)\s*as\s*(\S*)\s*\)(\s*)/i' => "<?php if(!empty($1)): \$loop = loop(count($1), \$loop ?? null); foreach($1 as $2): ?>\n",
-            '/@empty(?![\s(])/' => "<?php \$loop->increment(); endforeach; \$loop = \$loop->parent(); ?>\n<?php else: ?>",
-            '/@endforelse/' => '<?php endif; ?>',
-
-            // this comes last so it does not match others above
-            '/@for\s?(\(.+\s*=\s*(\d+);\s*.+;\s*.+\s*\))/i' => '<?php $loop = loop(\\2, $loop ?? null); for\\1: ?>',
-            '/@endfor/' => '<?php $loop->increment(); endfor; $loop = $loop->parent(); ?>',
-
-            # each statements
-            # eachelse matches first
-            '/@each\s?\((.*)\s*,\s*(.*)\s*,\s*[(\'|\")](.*)[(\'|\")],\s*(.*)\s*\)/i' => "<?php if (!empty($2)): \$loop = loop(count($2), \$loop ?? null); foreach($2 as \$$3): ?>\n@include($1)\n<?php \$loop->increment(); endforeach; \$loop = \$loop->parent(); ?>\n<?php else: ?>\n@include($4)\n<?php endif; ?>",
-            '/@each\s?\((.*)\s*,\s*(.*)\s*,\s*[(\'|\")](.*)[(\'|\")]\s*\)/i' => "<?php \$loop = loop(count($2), \$loop ?? null); foreach($2 as \$$3): ?>\n@include($1)\n<?php \$loop->increment(); endforeach; \$loop = \$loop->parent(); ?>",
-
-            // while
-            '/@while\s?\((.*)\)/i' => '<?php $loop = loop(count($1), $loop ?? null); while ($1): ?>',
-            '/@endwhile/' => '<?php $loop->increment(); endwhile; $loop = $loop->parent(); ?>',
-
-            # control structures
-            '/@(if|elseif)\s?\((.*)\)/i' => '<?php $1 ($2): ?>',
-            '/@else/i' => '<?php else: ?>',
-            '/@endif/' => '<?php endif; ?>',
-
-            # swap out @php and @endphp
-            '/@php\((.*)\)/i' => '<?php ($1); ?>',
-            '/@php/i' => '<?php',
-            '/@endphp/i' => '; ?>',
-
-        ];
-
-        return preg_replace(array_keys($map), array_values($map), $string);
+        return join('; ', $items);
+    }
+    /**
+     * Returns the html checked attribute if logic is true
+     * @param   mixed       $logic
+     * @return  string
+     */
+    public function checked(mixed $logic): string
+    {
+        return (true == $logic)
+            ? 'checked="checked"'
+            : '';
+    }
+    /**
+     * Returns the html disabled attribute if logic is true
+     * @param   mixed       $logic
+     * @return  string
+     */
+    public function disabled(mixed $logic): string
+    {
+        return (true == $logic)
+            ? 'disabled="disabled"'
+            : '';
+    }
+    /**
+     * Returns the html selected attribute if logic is true
+     * @param   mixed       $logic
+     * @return  string
+     */
+    public function selected(mixed $logic): string
+    {
+        return (true == $logic)
+            ? 'selected'
+            : '';
+    }
+    /**
+     * Returns the html readonly attribute if logic is true
+     * @param   mixed       $logic
+     * @return  string
+     */
+    public function readonly(mixed $logic): string
+    {
+        return (true == $logic)
+            ? 'readonly'
+            : '';
+    }
+    /**
+     * Returns the html required attribute if logic is true
+     * @param   mixed       $logic
+     * @return  string
+     */
+    public function required(mixed $logic): string
+    {
+        return (true == $logic)
+            ? 'required'
+            : '';
     }
 }

@@ -1,63 +1,37 @@
-Plates
-======
+# Blates
 
-[![Maintainer](http://img.shields.io/badge/maintainer-@ragboyjr-blue.svg?style=flat-square)](https://twitter.com/ragboyjr)
-[![Source Code](http://img.shields.io/badge/source-league/plates-blue.svg?style=flat-square)](https://github.com/thephpleague/plates)
-[![Latest Version](https://img.shields.io/github/release/thephpleague/plates.svg?style=flat-square)](https://github.com/thephpleague/plates/releases)
-[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/thephpleague/plates/php.yml?style=flat-square)](https://github.com/thephpleague/plates/actions?query=workflow%3APHP+branch%3Av3)
-[![Quality Score](https://img.shields.io/scrutinizer/g/thephpleague/plates.svg?style=flat-square)](https://scrutinizer-ci.com/g/thephpleague/plates)
-[![Total Downloads](https://img.shields.io/packagist/dt/league/plates.svg?style=flat-square)](https://packagist.org/packages/league/plates)
+This is a modified version of [Plates](https://platesphp.com) which precompiles any Blade syntax to Plates or PHP syntax before passing it trhough the Plates renderer.
 
-Plates is a native PHP template system that's fast, easy to use and easy to extend. It's inspired by the excellent [Twig](http://twig.sensiolabs.org/) template engine and strives to bring modern template language functionality to native PHP templates. Plates is designed for developers who prefer to use native PHP templates over compiled template languages, such as Twig or Smarty.
-
-### Highlights
-
-- Native PHP templates, no new [syntax](https://platesphp.com/templates/syntax/) to learn
-- Plates is a template system, not a template language
-- Plates encourages the use of existing PHP functions
-- Increase code reuse with template [layouts](https://platesphp.com/templates/layouts/) and [inheritance](https://platesphp.com/templates/inheritance/)
-- Template [folders](https://platesphp.com/engine/folders/) for grouping templates into namespaces
-- [Data](https://platesphp.com/templates/data/#preassigned-and-shared-data) sharing across templates
-- Preassign [data](https://platesphp.com/templates/data/#preassigned-and-shared-data) to specific templates
-- Built-in [escaping](https://platesphp.com/templates/escaping/) helpers
-- Easy to extend using [functions](https://platesphp.com/engine/functions/) and [extensions](https://platesphp.com/engine/extensions/)
-- Framework-agnostic, will work with any project
-- Decoupled design makes templates easy to test
-- Composer ready and PSR-2 compliant
+It simply adds a primary step to compile Blade before passing it into the unmodified PLates classes.
 
 ## Installation
 
-Plates is available via Composer:
+Blates is available via Composer:
 
 ```
-composer require league/plates
+composer require indgy/blates
 ```
 
 ## Documentation
 
-Full documentation can be found at [platesphp.com](https://platesphp.com/).
+The majority of Blade syntax is supported with the notable exception of components/slots.
 
-## Testing
+Full documentation on Plates can be found at [platesphp.com](https://platesphp.com/).
 
-```bash
-composer test
-```
+## Issues
 
-## Contributing
+This is still under development and some features will be missing until I need them.
 
-Please see [CONTRIBUTING](https://github.com/thephpleague/plates/blob/master/CONTRIBUTING.md) for details.
+If you discover any bugs or issues with behaviour or performance please create an issue, if you are able a pull request with a fix would be most helpful.
 
-## Security
+Please make sure to update tests as appropriate.
 
-If you discover any security related issues, please email ragboyjr@icloud.com instead of using the issue tracker.
+For major changes, please open an issue first to discuss what you would like to change.
 
 ## Credits
 
-- [RJ Garcia](https://github.com/ragboyjr) (Current Maintainer)
-- [Jonathan Reinink](https://github.com/reinink) (Original Author)
-- [All Contributors](https://github.com/thephpleague/plates/contributors)
+Everyone who made Laravel Blade what it is, and the gentlemen of The PHP League who created Plates.
 
 ## License
 
-The MIT License (MIT). Please see [License File](https://github.com/thephpleague/plates/blob/master/LICENSE) for more information.
+[BSD-3-Clause](https://choosealicense.com/licenses/bsd-3-clause/)
