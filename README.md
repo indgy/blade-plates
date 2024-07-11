@@ -1,8 +1,8 @@
 # Blates
 
-This is a modified version of [Plates](https://platesphp.com) which precompiles any Blade syntax to Plates or PHP syntax before passing it trhough the Plates renderer.
+This is a modified version of [Plates](https://platesphp.com) which precompiles any Blade syntax to Plates or PHP syntax before passing it through the Plates renderer.
 
-It simply adds a primary step to compile Blade before passing it into the unmodified PLates classes.
+It simply adds a primary step to compile Blade before passing it into the unmodified Plates classes.
 
 ## Installation
 
