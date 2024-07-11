@@ -1,52 +1,38 @@
 {
-    "name": "indgy/blade-plates",
-    "description": "Plates, with Blade syntax support!",
-    "keywords": [
-        "league",
-        "package",
-        "templating",
-        "templates",
-        "views"
-    ],
-    "homepage": "https://platesphp.com",
-    "license": "MIT",
-    "authors" : [
-        {
-            "name": "Jonathan Reinink",
-            "email": "jonathan@reinink.ca",
-            "role": "Developer"
-        },
-        {
-            "name": "RJ Garcia",
-            "email": "ragboyjr@icloud.com",
-            "role": "Developer"
-        }
-    ],
-    "require" : {
-        "php": "^7.0|^8.0"
-    },
-    "require-dev": {
-        "mikey179/vfsstream": "^1.6",
-        "phpunit/phpunit": "^9.5",
-        "squizlabs/php_codesniffer": "^3.5"
-    },
-    "autoload": {
-        "psr-4": {
-            "League\\Plates\\": "src"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "League\\Plates\\Tests\\": "tests"
-        }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "3.0-dev"
-        }
-    },
-    "scripts": {
-        "test": "phpunit --testdox --colors=always",
-        "docs": "hugo -s doc server"
+  "name": "indgy/blates",
+  "description": "Blade syntax support for Plates",
+  "keywords": [
+    "blade",
+    "plates",
+    "templating",
+    "templates",
+    "views"
+  ],
+  "homepage": "https://github.com/indgy/blates",
+  "license": "BDS-3-Clause",
+  "authors": [
+    {
+      "name": "indgy",
+      "email": "me@indgy.uk",
+      "role": "Developer"
     }
+  ],
+  "require": {
+    "php": "^7.0|^8.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "League\\Plates\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "League\\Plates\\Tests\\": "tests"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "3.0-dev"
+    }
+  }
 }
