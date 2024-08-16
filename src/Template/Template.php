@@ -504,6 +504,17 @@ class Template
         return join('; ', $items);
     }
     /**
+     * Returns the chosen string depending on the value of $count
+     * @param   int       $count
+     * @param   string    $singular
+     * @param   string    $plural
+     * @return  string
+     */
+    public function plural(int $count, string $singular, string $plural): string
+    {
+        return ($count === 1) ? $singular : $plural;
+    }
+    /**
      * Returns the html checked attribute if logic is true
      * @param   mixed       $logic
      * @return  string

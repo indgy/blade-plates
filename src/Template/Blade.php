@@ -177,6 +177,7 @@ class Blade
             // @production @live
             // @auth @endauth
             // @guest @endguest
+            '/@plural\s?\((.*)\)/i' => '<?php echo $this->plural($1); ?>',
 
             // @verbatim
 
