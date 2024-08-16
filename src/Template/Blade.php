@@ -142,7 +142,7 @@ class Blade
 
             // handle special forelse loop
             '/@forelse\s?\(\s*(\S*)\s*as\s*(\S*)\s*\)(\s*)/i' => "<?php if(!empty($1)): \$loop = \$this->loop(count($1), \$loop ?? null); foreach($1 as $2): ?>\n",
-            '/@empty(?![\s(])/' => "<?php \$loop->increment(); endforeach; \$loop = \$loop->parent(); ?>\n<?php else: ?>",
+            '/@empty\s?/' => "<?php \$loop->increment(); endforeach; \$loop = \$loop->parent(); ?>\n<?php else: ?>",
             '/@endforelse/' => '<?php endif; ?>',
 
             // this comes last so it does not match others above
